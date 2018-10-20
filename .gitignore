@@ -1,3 +1,4 @@
 .idea/
 TsFile-Parquet-Expr.iml
 target/
+*.ts

@@ -46,6 +46,9 @@ public class Constants {
     public static String filePath = "expr2.ts";
     public static int sensorNum = 10;
     public static int deviceNum = 1000;
+    /**
+     * number of points per sensor
+     */
     public static long ptNum = 20000;
 
     // query

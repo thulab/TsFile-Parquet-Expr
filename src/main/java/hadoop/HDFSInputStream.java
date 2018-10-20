@@ -21,17 +21,15 @@ public class HDFSInputStream implements ITsRandomAccessFileReader {
 	private FileStatus fileStatus;
 
 	public HDFSInputStream(String filePath) throws IOException {
-
 		this(filePath, new Configuration());
 	}
 
-	public HDFSInputStream(String filePath, Configuration configuration) throws IOException {
+	private HDFSInputStream(String filePath, Configuration configuration) throws IOException {
 
 		this(new Path(filePath), configuration);
 	}
 
-	public HDFSInputStream(Path path, Configuration configuration) throws IOException {
-
+	private HDFSInputStream(Path path, Configuration configuration) throws IOException {
 		FileSystem fs = FileSystem.get(configuration);
 		fsDataInputStream = fs.open(path);
 		fileStatus = fs.getFileStatus(path);

@@ -1,5 +1,6 @@
 package expr;
 
+import cn.edu.tsinghua.tsfile.file.metadata.enums.TSDataType;
 import cn.edu.tsinghua.tsfile.timeseries.write.TsFileWriter;
 import cn.edu.tsinghua.tsfile.timeseries.write.desc.MeasurementDescriptor;
 import cn.edu.tsinghua.tsfile.timeseries.write.exception.WriteProcessException;
@@ -25,19 +26,33 @@ public class TsFileGenerator {
     private long timeConsumption;
     private DataGenerator dataGenerator;
 
-    private void initWriter() throws WriteProcessException, IOException {
-        writer = new TsFileWriter(new HDFSOutputStream(filePath, true));
+    /**
+     * initialize the data input file stream and  register all the sensors.
+     * @param localFile whether saving the data on local disk. if false, then saving data on HDFS.
+     * @throws WriteProcessException
+     * @throws IOException
+     */
+    private void initWriter(boolean localFile) throws WriteProcessException, IOException {
+        if(localFile){
+            File file= new File(filePath);
+            if(file.exists()){
+                file.delete();
+            }
+            writer = new TsFileWriter(file);
+        }else{
+            writer = new TsFileWriter(new HDFSOutputStream(filePath, true));
+        }
         for (int i = 0; i < sensorNum; i++) {
             MeasurementDescriptor descriptor = new MeasurementDescriptor(SENSOR_PREFIX + i, dataType, encoding);
             writer.addMeasurement(descriptor);
         }
     }
 
-    private void gen() throws IOException, WriteProcessException {
+    private void gen(boolean localFile) throws IOException, WriteProcessException {
         long startTime = System.currentTimeMillis();
         monitorThread = new MonitorThread();
         monitorThread.start();
-        initWriter();
+        initWriter(localFile);
         dataGenerator = GeneratorFactory.INSTANCE.getGenerator();
         for(int i = 0; i < ptNum; i ++) {
             Object value = dataGenerator.next();
@@ -67,16 +82,17 @@ public class TsFileGenerator {
             }
         }
         writer.close();
+        timeConsumption = System.currentTimeMillis() - startTime;
         writer = null;
         monitorThread.interrupt();
-        timeConsumption = System.currentTimeMillis() - startTime;
+
     }
 
-    private void genNonalign() throws IOException, WriteProcessException {
+    private void genNonalign(boolean localFile) throws IOException, WriteProcessException {
         long startTime = System.currentTimeMillis();
         monitorThread = new MonitorThread();
         monitorThread.start();
-        initWriter();
+        initWriter(localFile);
         dataGenerator = GeneratorFactory.INSTANCE.getGenerator();
         for(int i = 0; i < ptNum; i ++) {
             Object value = dataGenerator.next();
@@ -116,9 +132,9 @@ public class TsFileGenerator {
         for (int i = 0; i < repetition; i ++) {
             TsFileGenerator generator = new TsFileGenerator();
             if (align)
-                generator.gen();
+                generator.gen(true);
             else
-                generator.genNonalign();
+                generator.genNonalign(true);
             double avgSpd = (sensorNum * deviceNum * ptNum) / (generator.timeConsumption / 1000.0);
             double memUsage = generator.monitorThread.getMaxMemUsage() / (1024.0 * 1024.0);
             totAvgSpd += avgSpd;
@@ -140,10 +156,11 @@ public class TsFileGenerator {
     public static void main(String[] args) throws IOException, WriteProcessException {
         filePath = "expr2.ts";
         align = true;
-        deviceNum = 500;
+        deviceNum = 1000;
         sensorNum = 10;
         repetition = 1;
         keepFile = true;
+        dataType = TSDataType.FLOAT;
         for (int pNum : new int[]{10000}) {
             ptNum = pNum;
             run();
