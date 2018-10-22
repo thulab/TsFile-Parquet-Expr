@@ -1,16 +1,15 @@
 package expr;
 
-import cn.edu.tsinghua.tsfile.common.utils.ITsRandomAccessFileReader;
 import cn.edu.tsinghua.tsfile.timeseries.filterV2.TimeFilter;
 import cn.edu.tsinghua.tsfile.timeseries.filterV2.expression.QueryFilter;
 import cn.edu.tsinghua.tsfile.timeseries.filterV2.expression.impl.GlobalTimeFilter;
 import cn.edu.tsinghua.tsfile.timeseries.read.support.Path;
+import cn.edu.tsinghua.tsfile.timeseries.readV2.TsFileSequenceReader;
 import cn.edu.tsinghua.tsfile.timeseries.readV2.controller.MetadataQuerierByFileImpl;
 import cn.edu.tsinghua.tsfile.timeseries.readV2.controller.SeriesChunkLoaderImpl;
 import cn.edu.tsinghua.tsfile.timeseries.readV2.query.QueryDataSet;
 import cn.edu.tsinghua.tsfile.timeseries.readV2.query.QueryExpression;
 import cn.edu.tsinghua.tsfile.timeseries.readV2.query.impl.QueryExecutorRouter;
-import hadoop.HDFSInputStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class TsFileQuerier {
     private long timeConsumption;
 
     private void initEngine() throws IOException {
-        ITsRandomAccessFileReader reader = new HDFSInputStream(filePath);
+        TsFileSequenceReader reader = new TsFileSequenceReader(filePath);
         router = new QueryExecutorRouter(new MetadataQuerierByFileImpl(reader),
                                          new SeriesChunkLoaderImpl(reader));
     }

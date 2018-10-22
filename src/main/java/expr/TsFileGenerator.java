@@ -156,7 +156,7 @@ public class TsFileGenerator {
     public static void main(String[] args) throws IOException, WriteProcessException {
         filePath = "expr2.ts";
         align = true;
-        deviceNum = 1000;
+        deviceNum = 500;
         sensorNum = 10;
         repetition = 1;
         keepFile = true;
