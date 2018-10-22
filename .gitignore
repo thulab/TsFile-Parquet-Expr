@@ -2,3 +2,5 @@
 TsFile-Parquet-Expr.iml
 target/
 *.ts
+*.ts.crc
+*.iml
