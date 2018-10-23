@@ -1,5 +1,9 @@
 package expr;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
 import cn.edu.tsinghua.tsfile.file.metadata.enums.TSDataType;
 import cn.edu.tsinghua.tsfile.timeseries.write.TsFileWriter;
 import cn.edu.tsinghua.tsfile.timeseries.write.desc.MeasurementDescriptor;
@@ -154,36 +158,88 @@ public class TsFileGenerator {
         System.out.println(String.format("Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB", totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition));
     }
 
-    public static void main(String[] args) throws IOException, WriteProcessException {
+    public static void main(String[] args) throws IOException, WriteProcessException, JoranException {
+        load("src/main/resources/logback.xml");
         filePath = "expr2.ts";
-        for(boolean ali: new boolean[]{true,false}){
-            align = ali;
-            for(int device : new int[]{1, 100, 1000, 10000, 100000}){
-                deviceNum = device;
-                for(int sensor : new int[] {1, 100, 1000, 10000, 100000}){
-                    sensorNum = sensor;
-                    for(TSDataType type : new TSDataType[]{TSDataType.FLOAT, TSDataType.INT64, TSDataType.INT32, TSDataType.DOUBLE}){
-                        dataType = type;
-                        repetition = 10;
-                        for (int pNum : new int[]{1, 100, 1000, 10000, 100000}) {
-                            ptNum = pNum;
-                            System.out.println();
-                            run();
-                        }
-                    }
+//        for(boolean ali: new boolean[]{true,false}){
+//            align = ali;
+//            for(int device : new int[]{1, 100, 1000, 10000, 100000}){
+//                deviceNum = device;
+//                for(int sensor : new int[] {1, 100, 1000, 10000, 100000}){
+//                    sensorNum = sensor;
+//                    for(TSDataType type : new TSDataType[]{TSDataType.FLOAT, TSDataType.INT64, TSDataType.INT32, TSDataType.DOUBLE}){
+//                        dataType = type;
+//                        repetition = 10;
+//                        for (int pNum : new int[]{1, 100, 1000, 10000, 100000}) {
+//                            ptNum = pNum;
+//                            System.out.println();
+//                            run();
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        logger.info("begin");
+        align = true;
+        deviceNum = 500;
+        sensorNum = 10;
+        repetition = 1;
+        keepFile = true;
+        dataType = TSDataType.FLOAT;
+        for (int pNum : new int[]{10000}) {
+            ptNum = pNum;
+            run();
+        }
+//        FileOutputStream outputStream=new FileOutputStream("test",true);
+//        System.out.println(outputStream.getChannel().position());
+//        outputStream.write("123".getBytes());
+//        System.out.println(outputStream.getChannel().position());
+
+
+    }
+
+
+    /**
+     * 加载外部的logback配置文件
+     *
+     * @param externalConfigFileLocation
+     *            配置文件路径
+     * @throws IOException
+     * @throws JoranException
+     */
+    public static void load(String externalConfigFileLocation) throws IOException, JoranException {
+
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        File externalConfigFile = new File(externalConfigFileLocation);
+
+        if (!externalConfigFile.exists()) {
+
+            throw new IOException("Logback External Config File Parameter does not reference a file that exists");
+
+        } else {
+
+            if (!externalConfigFile.isFile()) {
+                throw new IOException("Logback External Config File Parameter exists, but does not reference a file");
+
+            } else {
+
+                if (!externalConfigFile.canRead()) {
+                    throw new IOException("Logback External Config File exists and is a file, but cannot be read.");
+
+                } else {
+
+                    JoranConfigurator configurator = new JoranConfigurator();
+                    configurator.setContext(lc);
+                    lc.reset();
+                    configurator.doConfigure(externalConfigFileLocation);
+
+                    StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
                 }
+
             }
+
         }
 
-//        align = true;
-//        deviceNum = 1;
-//        sensorNum = 1;
-//        repetition = 10;
-//        keepFile = true;
-//        dataType = TSDataType.FLOAT;
-//        for (int pNum : new int[]{10000}) {
-//            ptNum = pNum;
-//            run();
-//        }
     }
 }
