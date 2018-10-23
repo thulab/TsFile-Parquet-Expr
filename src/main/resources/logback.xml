@@ -10,7 +10,7 @@
 			<charset>utf-8</charset>
 		</encoder>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>DEBUG</level>
+			<level>WARN</level>
 		</filter>
 	</appender>
 
