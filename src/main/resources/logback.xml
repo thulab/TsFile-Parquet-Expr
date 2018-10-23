@@ -17,4 +17,5 @@
 	<root level="error">
 		<appender-ref ref="stdout" />
 	</root>
+	<logger name="expr" level="stdout"/>
 </configuration>

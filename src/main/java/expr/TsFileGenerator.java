@@ -13,6 +13,8 @@ import cn.edu.tsinghua.tsfile.timeseries.write.record.datapoint.LongDataPoint;
 import datagen.DataGenerator;
 import datagen.GeneratorFactory;
 import hadoop.HDFSOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +28,7 @@ public class TsFileGenerator {
     private long timeConsumption;
     private DataGenerator dataGenerator;
 
+    static Logger logger = LoggerFactory.getLogger(TsFileGenerator.class);
     /**
      * initialize the data input file stream and  register all the sensors.
      * @param localFile whether saving the data on local disk. if false, then saving data on HDFS.
@@ -147,23 +150,40 @@ public class TsFileGenerator {
                 file.delete();
             }
         }
-        System.out.println(String.format("FileName: %s; DataType: %s; Encoding: %s", filePath, dataType, encoding));
-        System.out.println(String.format("DeviceNum: %d; SensorNum: %d; PtPerCol: %d; Wave: %s", deviceNum, sensorNum, ptNum, wave));
-        System.out.println(String.format("Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB",
-                totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition));
+        System.out.println(String.format("FileName: %s; DataType: %s; Encoding: %s; DeviceNum: %d; SensorNum: %d; PtPerCol: %d; Wave: %s", filePath, dataType, encoding, deviceNum, sensorNum, ptNum, wave));
+        System.out.println(String.format("Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB", totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition));
     }
 
     public static void main(String[] args) throws IOException, WriteProcessException {
         filePath = "expr2.ts";
-        align = true;
-        deviceNum = 500;
-        sensorNum = 10;
-        repetition = 1;
-        keepFile = true;
-        dataType = TSDataType.FLOAT;
-        for (int pNum : new int[]{10000}) {
-            ptNum = pNum;
-            run();
+        for(boolean ali: new boolean[]{true,false}){
+            align = ali;
+            for(int device : new int[]{1, 100, 1000, 10000, 100000}){
+                deviceNum = device;
+                for(int sensor : new int[] {1, 100, 1000, 10000, 100000}){
+                    sensorNum = sensor;
+                    for(TSDataType type : new TSDataType[]{TSDataType.FLOAT, TSDataType.INT64, TSDataType.INT32, TSDataType.DOUBLE}){
+                        dataType = type;
+                        repetition = 10;
+                        for (int pNum : new int[]{1, 100, 1000, 10000, 100000}) {
+                            ptNum = pNum;
+                            System.out.println();
+                            run();
+                        }
+                    }
+                }
+            }
         }
+
+//        align = true;
+//        deviceNum = 1;
+//        sensorNum = 1;
+//        repetition = 10;
+//        keepFile = true;
+//        dataType = TSDataType.FLOAT;
+//        for (int pNum : new int[]{10000}) {
+//            ptNum = pNum;
+//            run();
+//        }
     }
 }
