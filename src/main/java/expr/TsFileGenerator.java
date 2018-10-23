@@ -84,9 +84,9 @@ public class TsFileGenerator {
                 }
                 writer.write(record);
             }
-            if ((i + 1) % (ptNum / 100) == 0) {
-                // System.out.println(String.format("Progress: %d%%", (i + 1)*100 / ptNum));
-            }
+//            if ((i + 1) % (ptNum / 100) == 0) {
+//                // System.out.println(String.format("Progress: %d%%", (i + 1)*100 / ptNum));
+//            }
         }
         writer.close();
         timeConsumption = System.currentTimeMillis() - startTime;
@@ -146,50 +146,51 @@ public class TsFileGenerator {
             double memUsage = generator.monitorThread.getMaxMemUsage() / (1024.0 * 1024.0);
             totAvgSpd += avgSpd;
             totMemUsage += memUsage;
-            System.out.println(String.format("TsFile generation completed. avg speed : %fpt/s, max memory usage: %fMB",
-                    avgSpd, memUsage));
+            //System.out.println(String.format("TsFile generation completed. avg speed : %fpt/s, max memory usage: %fMB",
+            //        avgSpd, memUsage));
             File file = new File(filePath);
             totFileSize += file.length() / (1024.0 * 1024.0);
             if (!keepFile) {
                 file.delete();
             }
         }
-        System.out.println(String.format("FileName: %s; DataType: %s; Encoding: %s; DeviceNum: %d; SensorNum: %d; PtPerCol: %d; Wave: %s", filePath, dataType, encoding, deviceNum, sensorNum, ptNum, wave));
-        System.out.println(String.format("Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB", totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition));
+        logger.info(String.format("FileName: %s; DataType: %s; Encoding: %s; DeviceNum: %d; SensorNum: %d; PtPerCol: %d; Wave: %s; " +
+                        "Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB",
+                filePath, dataType, encoding, deviceNum, sensorNum, ptNum, wave,
+                totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition));
     }
 
     public static void main(String[] args) throws IOException, WriteProcessException, JoranException {
         load("src/main/resources/logback.xml");
-        filePath = "expr2.ts";
-//        for(boolean ali: new boolean[]{true,false}){
-//            align = ali;
-//            for(int device : new int[]{1, 100, 1000, 10000, 100000}){
-//                deviceNum = device;
-//                for(int sensor : new int[] {1, 100, 1000, 10000, 100000}){
-//                    sensorNum = sensor;
-//                    for(TSDataType type : new TSDataType[]{TSDataType.FLOAT, TSDataType.INT64, TSDataType.INT32, TSDataType.DOUBLE}){
-//                        dataType = type;
-//                        repetition = 10;
-//                        for (int pNum : new int[]{1, 100, 1000, 10000, 100000}) {
-//                            ptNum = pNum;
-//                            System.out.println();
-//                            run();
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        logger.info("begin");
-        align = true;
-        deviceNum = 500;
-        sensorNum = 10;
-        repetition = 1;
-        keepFile = true;
-        dataType = TSDataType.FLOAT;
-        for (int pNum : new int[]{10000}) {
-            ptNum = pNum;
-            run();
+        filePath = "/Volumes/hxdu64/expr2.ts";
+        repetition = 10;
+        for(boolean ali: new boolean[]{true,false}){
+            align = ali;
+            for(TSDataType type : new TSDataType[]{TSDataType.FLOAT, TSDataType.INT64, TSDataType.INT32, TSDataType.DOUBLE}){
+                dataType = type;
+                for(int device : new int[]{1, 100, 1000, 10000, 100000}){
+                    deviceNum = device;
+                    for(int sensor : new int[] {1, 100, 1000, 10000, 100000}){
+                        sensorNum = sensor;
+                        for (int pNum : new int[]{1, 100, 1000, 10000, 100000}) {
+                            ptNum = pNum;
+                                run();
+                        }
+                    }
+                }
+            }
         }
+//        logger.info("begin");
+//        align = true;
+//        deviceNum = 500;
+//        sensorNum = 10;
+//        repetition = 1;
+//        keepFile = true;
+//        dataType = TSDataType.FLOAT;
+//        for (int pNum : new int[]{10000}) {
+//            ptNum = pNum;
+//            run();
+//        }
 //        FileOutputStream outputStream=new FileOutputStream("test",true);
 //        System.out.println(outputStream.getChannel().position());
 //        outputStream.write("123".getBytes());
