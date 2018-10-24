@@ -4,3 +4,4 @@ target/
 *.ts
 *.ts.crc
 *.iml
+*.class

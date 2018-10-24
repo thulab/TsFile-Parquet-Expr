@@ -17,6 +17,7 @@ import cn.edu.tsinghua.tsfile.timeseries.write.record.datapoint.LongDataPoint;
 import datagen.DataGenerator;
 import datagen.GeneratorFactory;
 import hadoop.HDFSOutputStream;
+import hadoop.MemoryTsRandomAccessFileWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class TsFileGenerator {
             if(file.exists()){
                 file.delete();
             }
+            //writer = new TsFileWriter(new MemoryTsRandomAccessFileWriter());
             writer = new TsFileWriter(file);
         }else{
             writer = new TsFileWriter(new HDFSOutputStream(filePath, true));
@@ -136,6 +138,7 @@ public class TsFileGenerator {
 
     private static void run() throws IOException, WriteProcessException {
         double totAvgSpd = 0.0, totMemUsage = 0.0, totFileSize = 0.0;
+        long time = System.currentTimeMillis();
         for (int i = 0; i < repetition; i ++) {
             TsFileGenerator generator = new TsFileGenerator();
             if (align)
@@ -155,9 +158,9 @@ public class TsFileGenerator {
             }
         }
         logger.info(String.format("FileName: %s; DataType: %s; Encoding: %s; DeviceNum: %d; SensorNum: %d; PtPerCol: %d; Wave: %s; " +
-                        "Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB",
+                        "Total Avg speed : %fpt/s; Total max memory usage: %fMB; File size: %fMB; Time Cost: %dms",
                 filePath, dataType, encoding, deviceNum, sensorNum, ptNum, wave,
-                totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition));
+                totAvgSpd / repetition, totMemUsage / repetition, totFileSize / repetition, (System.currentTimeMillis()-time)/repetition));
     }
 
     public static void main(String[] args) throws IOException, WriteProcessException, JoranException {
@@ -168,11 +171,11 @@ public class TsFileGenerator {
             align = ali;
             for(TSDataType type : new TSDataType[]{TSDataType.FLOAT, TSDataType.INT64, TSDataType.INT32, TSDataType.DOUBLE}){
                 dataType = type;
-                for(int device : new int[]{1, 100, 1000, 10000, 100000}){
+                for(int device : new int[]{1, 100, 1000, 10000, }){
                     deviceNum = device;
-                    for(int sensor : new int[] {1, 100, 1000, 10000, 100000}){
+                    for(int sensor : new int[] {1, 100, 1000, 10000, }){
                         sensorNum = sensor;
-                        for (int pNum : new int[]{1, 100, 1000, 10000, 100000}) {
+                        for (int pNum : new int[]{1, 100, 1000, 10000, }) {
                             ptNum = pNum;
                                 run();
                         }
