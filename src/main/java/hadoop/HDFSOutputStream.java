@@ -48,7 +48,7 @@ public class HDFSOutputStream implements ITsRandomAccessFileWriter {
 	}
 
 	@Override
-	public void seek(long offset) throws IOException {
+	public void truncate(long offset) throws IOException {
 		throw new IOException("Not support");
 	}
 
